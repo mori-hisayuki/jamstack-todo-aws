@@ -1,0 +1,12 @@
+{
+  "name": "serverless-todo-netlify-faunadb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:mori-hisayuki/serverless-todo-netlify-fauna.git",
+  "author": "hisayuki-mori",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+      "packages/*"
+  ]
+}
