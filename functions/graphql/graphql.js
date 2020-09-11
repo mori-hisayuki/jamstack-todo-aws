@@ -67,13 +67,13 @@ const resolvers = {
       return {
         id: todoUuid,
         done: false,
-        test
+        text
       }
     },
     updateTodoDone: async (_, {id}, {user}) => {
       if (!user) throw new Error('Must be authenticated to insert todos')
       const params = {
-        tableName: table,
+        TableName: table,
         Key: {
           pk: `user#${user}`,
           sk: `todo#${id}`
