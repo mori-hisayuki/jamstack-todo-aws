@@ -22,7 +22,7 @@ const authLink = setContext((_, {headers}) => {
 })
 
 const httpLink = new HttpLink({
-    uri: 'https://jamstack-todo-netlify-faunadb.netlify.app/.netlify/functions/graphql',
+    uri: '/.netlify/functions/graphql',
 })
 
 const client = new ApolloClient({
