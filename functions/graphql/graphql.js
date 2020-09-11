@@ -4,8 +4,8 @@ const {v4: uuid} = require('uuid')
 
 AWS.config.update({
   region: 'ap-northeast-1',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  accessKeyId: process.env.NETLIFY_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.NETLIFY_AWS_SECRET_ACCESS_KEY
 });
 
 const table = 'todos'
