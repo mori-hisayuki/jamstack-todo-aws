@@ -1,9 +1,15 @@
 const {ApolloServer, gql} = require('apollo-server-lambda')
-const faunadb = require('faunadb')
-const q = faunadb.query
+const AWS = require('aws-sdk')
+const {v4: uuid} = require('uuid')
 
-const client = new faunadb.Client({secret: process.env.FAUNA})
+AWS.config.update({
+  region: 'ap-northeast-1',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
+const table = 'todos'
+const doClient = new AWS.DynamoDB.DocumentClient()
 
 const typeDefs = gql`
   type Query {
@@ -27,32 +33,41 @@ const resolvers = {
       if (!user) {
         return []
       } else {
-        const results = await client.query(
-            q.Paginate(q.Match(q.Index('todos_by_user'), user))
-        )
-        return results.data.map(([ref, text, done]) => ({
-          id: ref.id,
-          text,
-          done
-        }))
+        const params = {
+          TableName: table,
+          KeyConditionExpression: 'pk = :userid and begins_with(sk, :todokey)',
+          ExpressionAttributeValues: {
+              ':userid': `user#${user}`,
+              ':todokey': 'todo#'
+          }
+        }
+        const result = await doClient.query(params).promise()
+        return result.Items.map(({pk, sk, data}) => ({id: sk.replace('todo#', ''), ...data}))
       }
     },
   },
   Mutation: {
     addTodo: async (_, {text}, {user}) => {
       if (!user) throw new Error('Must be authenticated to insert todos')
-      const results = await client.query(
-        q.Create(q.Collection("todos"), {
-          data: {
-            text,
-            done: false,
-            owner: user
+      const todoUuid = uuid()
+      const params = {
+          TableName: table,
+          Item: {
+              pk: `user#${user}`,
+              sk: `todo#${todoUuid}`,
+              data: {
+                  createdAt: Date.now(),
+                  updatedAt: Date.now(),
+                  done: false,
+                  text
+              }
           }
-        })
-      )
+      }
+      await doClient.put(params).promise()
       return {
-        ...results.data,
-        id: results.ref.id
+        id: todoUuid,
+        done: false,
+        test
       }
     },
     updateTodoDone: async (_, {id}, {user}) => {

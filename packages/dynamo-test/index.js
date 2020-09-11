@@ -9,20 +9,29 @@ const table = 'todos'
 const doClient = new AWS.DynamoDB.DocumentClient()
 
 run = async () => {
+ //   const params = {
+ //       TableName: table,
+ //       Item: {
+ //           pk: 'user#1',
+ //           sk: `todo#${uuid()}`,
+ //           data: {
+ //               createdAt: Date.now(),
+ //               updatedAt: Date.now(),
+ //               done: false
+ //           }
+ //       }
+ //   }
+
     const params = {
         TableName: table,
-        Item: {
-            pk: 'user#1',
-            sk: `todo#${uuid()}`,
-            data: {
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-                done: false
-            }
+        KeyConditionExpression: 'pk = :userid and begins_with(sk, :todokey)',
+        ExpressionAttributeValues: {
+            ':userid': 'user#1',
+            ':todokey': 'todo#'
         }
     }
-    const result = await doClient.put(params).promise().catch(err => console.log(err))
-    console.log(result)
+    const result = await doClient.query(params).promise().catch(err => console.log(err))
+    console.log(JSON.stringify(result, null, 2))
 }
 
 run()
