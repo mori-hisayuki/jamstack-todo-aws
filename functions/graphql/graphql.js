@@ -80,6 +80,10 @@ const resolvers = {
         },
         UpdateExpression: 'set #data.#done = :newdone',
         ExpressionAttributeNames: {
+          '#data': 'data',
+          '#done': 'done'
+        },
+        ExpressionAttributeValues: {
           ':newdone': true
         },
         ReturnValues: 'ALL_NEW'
