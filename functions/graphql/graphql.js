@@ -72,16 +72,24 @@ const resolvers = {
     },
     updateTodoDone: async (_, {id}, {user}) => {
       if (!user) throw new Error('Must be authenticated to insert todos')
-      const results = await client.query(
-        q.Update(q.Ref(q.Collection("todos"), id), {
-          data: {
-            done: true
-          }
-        })
-      )
+      const params = {
+        tableName: table,
+        Key: {
+          pk: `user#${user}`,
+          sk: `todo#${id}`
+        },
+        UpdateExpression: 'set #data.#done = :newdone',
+        ExpressionAttributeNames: {
+          ':newdone': true
+        },
+        ReturnValues: 'ALL_NEW'
+      }
+      const result = await doClient.update(params).promise()
+      const { pk, sk, data } = result.Attributes
       return {
-        ...results.data,
-        id: results.ref.id
+        id: sk.replace('todo#', ''),
+        text: data.text,
+        done: data.done
       }
     }
   }
